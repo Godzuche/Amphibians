@@ -16,23 +16,48 @@
 package com.example.amphibians.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.amphibians.network.Amphibian
+import com.example.amphibians.network.AmphibianApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import java.lang.Exception
 
-enum class AmphibianApiStatus {LOADING, ERROR, DONE}
+enum class AmphibianApiStatus { LOADING, ERROR, DONE }
 
 class AmphibianViewModel : ViewModel() {
 
     // TODO: Create properties to represent MutableLiveData and LiveData for the API status
+    private val _status = MutableStateFlow<AmphibianApiStatus>(AmphibianApiStatus.LOADING)
+    val status: StateFlow<AmphibianApiStatus> = _status
 
     // TODO: Create properties to represent MutableLiveData and LiveData for a list of amphibian objects
+    private val _amphibians = MutableStateFlow<List<Amphibian>>(emptyList())
+    val amphibians: StateFlow<List<Amphibian>> = _amphibians
 
     // TODO: Create properties to represent MutableLiveData and LiveData for a single amphibian object.
     //  This will be used to display the details of an amphibian when a list item is clicked
+    private val _amphibian = MutableStateFlow<Amphibian>(Amphibian( "", "", ""))
+    val amphibian: StateFlow<Amphibian> = _amphibian
 
     // TODO: Create a function that gets a list of amphibians from the api service and sets the
     //  status via a Coroutine
+    fun getAmphibianList() {
+        viewModelScope.launch {
+
+            try {
+                _status.value = AmphibianApiStatus.LOADING
+                _amphibians.value = AmphibianApi.retrofitService.getAmphibians()
+            } catch (e: Exception) {
+                _status.value = AmphibianApiStatus.ERROR
+                _amphibians.value = emptyList()
+            }
+        }
+    }
 
     fun onAmphibianClicked(amphibian: Amphibian) {
         // TODO: Set the amphibian object
+        _amphibian.value = amphibian
     }
 }
