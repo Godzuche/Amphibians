@@ -45,10 +45,11 @@ class AmphibianViewModel : ViewModel() {
     //  status via a Coroutine
     fun getAmphibianList() {
         viewModelScope.launch {
+            _status.value = AmphibianApiStatus.LOADING
 
             try {
-                _status.value = AmphibianApiStatus.LOADING
                 _amphibians.value = AmphibianApi.retrofitService.getAmphibians()
+                _status.value = AmphibianApiStatus.DONE
             } catch (e: Exception) {
                 _status.value = AmphibianApiStatus.ERROR
                 _amphibians.value = emptyList()
